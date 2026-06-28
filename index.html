@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Hướng dẫn cấu hình VPN iOS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:           #f0efed;
+    --surface:      #ffffff;
+    --surface-dim:  #f5f5f3;
+    --border:       rgba(0,0,0,0.10);
+    --border-strong:rgba(0,0,0,0.16);
+    --text:         #1a1a18;
+    --text-sec:     #5f5e5a;
+    --text-muted:   #999894;
+    --radius:       10px;
+
+    --accent-bg:    #e6f1fb; --accent-text: #185fa5; --accent-border: #b5d4f4;
+    --success-bg:   #eaf3de; --success-text: #3b6d11; --success-border:#c0dd97;
+    --danger-bg:    #fcebeb; --danger-text:  #a32d2d; --danger-border: #f7c1c1;
+    --warning-bg:   #faeeda; --warning-text: #854f0b; --warning-border:#fac775;
+    --pro-bg:       #eeedfe; --pro-text:     #534ab7; --pro-border:    #afa9ec;
+
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:           #111110;
+      --surface:      #1e1e1c;
+      --surface-dim:  #181816;
+      --border:       rgba(255,255,255,0.09);
+      --border-strong:rgba(255,255,255,0.15);
+      --text:         #e8e7e3;
+      --text-sec:     #b4b2a9;
+      --text-muted:   #6b6a66;
+
+      --accent-bg:    #0c447c; --accent-text: #b5d4f4; --accent-border: #185fa5;
+      --success-bg:   #27500a; --success-text: #c0dd97; --success-border:#3b6d11;
+      --danger-bg:    #791f1f; --danger-text:  #f7c1c1; --danger-border: #a32d2d;
+      --warning-bg:   #633806; --warning-text: #fac775; --warning-border:#854f0b;
+      --pro-bg:       #3c3489; --pro-text:     #cecbf6; --pro-border:    #534ab7;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── PHONE SHELL ── */
+  .phone {
+    width: 100%;
+    max-width: 390px;
+    background: var(--surface-dim);
+    border-radius: 44px;
+    border: 0.5px solid var(--border-strong);
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10);
+  }
+
+  /* notch bar */
+  .notch-bar {
+    background: var(--surface);
+    height: 52px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .notch {
+    width: 120px; height: 30px;
+    background: #0b0b0b;
+    border-radius: 0 0 20px 20px;
+    position: relative;
+  }
+  .notch::before, .notch::after {
+    content:''; position:absolute; top:0;
+    width:8px; height:8px;
+    background: var(--surface);
+  }
+  .notch::before { left:-8px; border-radius:0 0 0 8px; box-shadow:-2px 0 0 0 #0b0b0b; }
+  .notch::after  { right:-8px; border-radius:0 0 8px 0; box-shadow:2px 0 0 0 #0b0b0b; }
+
+  /* top bar */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+  }
+  .back-btn {
+    font-size: 15px; color: var(--accent-text);
+    display: flex; align-items: center; gap: 2px;
+    cursor: pointer; background: none; border: none;
+    padding: 0; font-family: var(--font); white-space: nowrap;
+  }
+  .back-btn i { font-size: 18px; }
+  .topbar-title {
+    font-size: 16px; font-weight: 600;
+    flex: 1; text-align: center; color: var(--text);
+  }
+  .topbar-spacer { width: 70px; }
+
+  /* scroll body */
+  .phone-body {
+    overflow-y: auto;
+    max-height: 680px;
+    background: var(--surface-dim);
+    -webkit-overflow-scrolling: touch;
+  }
+  .phone-body::-webkit-scrollbar { display: none; }
+
+  /* home pad */
+  .home-pad { padding-bottom: 32px; }
+
+  /* section label */
+  .section-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .07em;
+    padding: 18px 20px 7px;
+  }
+
+  /* row group */
+  .row-group {
+    background: var(--surface);
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 2px;
+  }
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 16px 11px 14px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: background .1s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 56px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row:active { background: var(--surface-dim); }
+
+  .row-icon {
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ic-blue   { background: var(--accent-bg);  color: var(--accent-text); }
+  .ic-green  { background: var(--success-bg); color: var(--success-text); }
+  .ic-red    { background: var(--danger-bg);  color: var(--danger-text); }
+  .ic-purple { background: var(--pro-bg);     color: var(--pro-text); }
+  .ic-yellow { background: var(--warning-bg); color: var(--warning-text); }
+
+  .row-content { flex: 1; min-width: 0; }
+  .row-title   { font-size: 15px; font-weight: 500; color: var(--text); }
+  .row-sub     { font-size: 12px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .row-right   { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .chev        { font-size: 14px; color: var(--text-muted); }
+
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 99px; font-weight: 600; }
+  .b-red    { background: var(--danger-bg);  color: var(--danger-text); }
+  .b-yellow { background: var(--warning-bg); color: var(--warning-text); }
+  .b-green  { background: var(--success-bg); color: var(--success-text); }
+
+  /* ── DETAIL VIEW ── */
+  #detail-view { display: none; }
+
+  .detail-body { padding: 0 0 32px; }
+
+  .detail-card {
+    background: var(--surface);
+    border-top: 0.5px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
+    margin: 0 0 2px;
+    padding: 14px 16px;
+  }
+
+  .step-list { list-style: none; }
+  .step-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .step-item:last-child { border-bottom: none; }
+
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-bg); color: var(--accent-text);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-text {
+    font-size: 14px; color: var(--text-sec); line-height: 1.55;
+  }
+  .step-text strong { color: var(--text); font-weight: 600; }
+
+  .note-box {
+    border-radius: 10px; padding: 10px 13px;
+    font-size: 13px; line-height: 1.5;
+    display: flex; gap: 8px; align-items: flex-start;
+    margin-top: 12px;
+    border: 0.5px solid;
+  }
+  .note-box i { flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+  .note-tip  { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+  .note-fix  { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+  .note-info { background: var(--accent-bg);  color: var(--accent-text);  border-color: var(--accent-border); }
+
+  /* person rows */
+  .person-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .person-row:last-of-type { border-bottom: none; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-b { background: var(--accent-bg);  color: var(--accent-text); }
+  .av-g { background: var(--success-bg); color: var(--success-text); }
+  .av-p { background: var(--pro-bg);     color: var(--pro-text); }
+  .av-y { background: var(--warning-bg); color: var(--warning-text); }
+  .person-info { flex: 1; min-width: 0; }
+  .person-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .person-role { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .contact-tag {
+    font-size: 11px; padding: 3px 9px; border-radius: 99px;
+    background: var(--accent-bg); color: var(--accent-text);
+    white-space: nowrap; font-weight: 500;
+  }
+
+  /* home button */
+  .home-indicator {
+    background: var(--surface);
+    border-top: 0.5px solid var(--border);
+    height: 32px; display: flex; align-items: center; justify-content: center;
+  }
+  .home-bar {
+    width: 120px; height: 4px;
+    background: var(--text-muted); border-radius: 99px;
+  }
+
+  .content-panel { display: none; }
+  .content-panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- notch -->
+  <div class="notch-bar"><div class="notch"></div></div>
+
+  <!-- top bar -->
+  <div class="topbar">
+    <button class="back-btn" id="back-btn" onclick="goHome()" style="visibility:hidden">
+      <i class="ti ti-chevron-left"></i> Quay lại
+    </button>
+    <div class="topbar-title" id="topbar-title">VPN iOS</div>
+    <div class="topbar-spacer"></div>
+  </div>
+
+  <!-- scrollable body -->
+  <div class="phone-body">
+
+    <!-- ── HOME VIEW ── -->
+    <div id="home-view" class="home-pad">
+
+      <div class="section-label">Hướng dẫn sử dụng</div>
+      <div class="row-group">
+        <div class="row" onclick="openSection('setup')">
+          <div class="row-icon ic-blue"><i class="ti ti-shield-lock"></i></div>
+          <div class="row-content">
+            <div class="row-title">Cài đặt VPN lần đầu</div>
+            <div class="row-sub">Thêm cấu hình VPN vào iPhone</div>
+          </div>
+          <div class="row-right"><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('connect')">
+          <div class="row-icon ic-green"><i class="ti ti-wifi"></i></div>
+          <div class="row-content">
+            <div class="row-title">Kết nối và ngắt VPN</div>
+            <div class="row-sub">Bật tắt VPN hằng ngày</div>
+          </div>
+          <div class="row-right"><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('check')">
+          <div class="row-icon ic-purple"><i class="ti ti-circle-check"></i></div>
+          <div class="row-content">
+            <div class="row-title">Kiểm tra VPN hoạt động</div>
+            <div class="row-sub">Xác nhận đã kết nối đúng</div>
+          </div>
+          <div class="row-right"><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+      </div>
+
+      <div class="section-label">Xử lý lỗi thường gặp</div>
+      <div class="row-group">
+        <div class="row" onclick="openSection('err1')">
+          <div class="row-icon ic-red"><i class="ti ti-plug-x"></i></div>
+          <div class="row-content">
+            <div class="row-title">Không kết nối được VPN</div>
+            <div class="row-sub">VPN báo lỗi hoặc quay vòng mãi</div>
+          </div>
+          <div class="row-right"><span class="badge b-red">Hay gặp</span><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('err2')">
+          <div class="row-icon ic-yellow"><i class="ti ti-wifi-off"></i></div>
+          <div class="row-content">
+            <div class="row-title">VPN kết nối nhưng mạng chậm</div>
+            <div class="row-sub">Ping cao, tải trang lâu</div>
+          </div>
+          <div class="row-right"><span class="badge b-yellow">Thỉnh thoảng</span><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('err3')">
+          <div class="row-icon ic-red"><i class="ti ti-alert-triangle"></i></div>
+          <div class="row-content">
+            <div class="row-title">Lỗi xác thực (Auth failed)</div>
+            <div class="row-sub">Sai tài khoản hoặc certificate</div>
+          </div>
+          <div class="row-right"><span class="badge b-red">Hay gặp</span><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('err4')">
+          <div class="row-icon ic-yellow"><i class="ti ti-refresh"></i></div>
+          <div class="row-content">
+            <div class="row-title">VPN tự động ngắt kết nối</div>
+            <div class="row-sub">Bị drop sau vài phút</div>
+          </div>
+          <div class="row-right"><span class="badge b-yellow">Thỉnh thoảng</span><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+        <div class="row" onclick="openSection('err5')">
+          <div class="row-icon ic-red"><i class="ti ti-file-x"></i></div>
+          <div class="row-content">
+            <div class="row-title">Không nhập được profile VPN</div>
+            <div class="row-sub">File .mobileconfig lỗi</div>
+          </div>
+          <div class="row-right"><span class="badge b-red">Hay gặp</span><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+      </div>
+
+      <div class="section-label">Liên hệ hỗ trợ</div>
+      <div class="row-group">
+        <div class="row" onclick="openSection('team')">
+          <div class="row-icon ic-blue"><i class="ti ti-users"></i></div>
+          <div class="row-content">
+            <div class="row-title">Đội ngũ hỗ trợ</div>
+            <div class="row-sub">Người tin cậy khi gặp sự cố</div>
+          </div>
+          <div class="row-right"><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+      </div>
+
+    </div><!-- #home-view -->
+
+    <!-- ── DETAIL VIEW ── -->
+    <div id="detail-view">
+      <div class="detail-body">
+
+        <!-- Cài đặt lần đầu -->
+        <div id="content-setup" class="content-panel">
+          <div class="section-label">Các bước thực hiện</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Vào <strong>Cài đặt</strong> (Settings) trên iPhone.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Chọn <strong>Cài đặt chung</strong> → <strong>VPN và quản lý thiết bị</strong>.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Nhấn <strong>Thêm cấu hình VPN</strong>.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Chọn loại VPN: <strong>IKEv2</strong>, <strong>IPSec</strong>, hoặc <strong>L2TP</strong> — hỏi admin nếu không biết loại nào.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">5</span>
+                <span class="step-text">Điền <strong>Máy chủ</strong> (Server), <strong>Tài khoản</strong>, <strong>Mật khẩu</strong> do admin cung cấp.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">6</span>
+                <span class="step-text">Nhấn <strong>Xong</strong> — VPN sẽ xuất hiện trong danh sách.</span>
+              </li>
+            </ol>
+            <div class="note-box note-tip">
+              <i class="ti ti-info-circle"></i>
+              Nếu được cấp file <strong>.mobileconfig</strong>, chỉ cần mở file đó trong Safari — iOS tự cài profile, không cần nhập tay.
+            </div>
+          </div>
+        </div>
+
+        <!-- Kết nối và ngắt -->
+        <div id="content-connect" class="content-panel">
+          <div class="section-label">Các bước thực hiện</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Vào <strong>Cài đặt</strong> → <strong>Cài đặt chung</strong> → <strong>VPN và quản lý thiết bị</strong>.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Gạt công tắc <strong>Trạng thái</strong> sang bật để kết nối VPN.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Biểu tượng <strong>VPN</strong> xuất hiện ở góc trên màn hình là đã kết nối thành công.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Để ngắt: gạt lại công tắc sang tắt, hoặc kéo Trung tâm điều khiển và tắt VPN.</span>
+              </li>
+            </ol>
+            <div class="note-box note-info">
+              <i class="ti ti-bulb"></i>
+              Có thể bật nhanh từ <strong>Trung tâm điều khiển</strong> (vuốt từ góc phải xuống) nếu đã thêm nút VPN vào đó trong Cài đặt.
+            </div>
+          </div>
+        </div>
+
+        <!-- Kiểm tra -->
+        <div id="content-check" class="content-panel">
+          <div class="section-label">Các bước thực hiện</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Sau khi kết nối, mở Safari và truy cập <strong>whatismyip.com</strong>.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">IP hiển thị phải là <strong>IP của VPN server</strong>, không phải IP mạng nhà hay mạng di động.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Nếu VPN nội bộ công ty: thử truy cập tài nguyên nội bộ để xác nhận đường hầm hoạt động.</span>
+              </li>
+            </ol>
+            <div class="note-box note-fix">
+              <i class="ti ti-check"></i>
+              IP khác với IP thật của bạn = VPN đang hoạt động đúng.
+            </div>
+          </div>
+        </div>
+
+        <!-- Lỗi 1 -->
+        <div id="content-err1" class="content-panel">
+          <div class="section-label">Cách xử lý</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Kiểm tra <strong>Wi-Fi hoặc dữ liệu di động</strong> có hoạt động không — thử mở một trang web bình thường.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Tắt VPN, đợi 10 giây, rồi bật lại.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Kiểm tra địa chỉ <strong>Máy chủ</strong> (Server) có đúng không — liên hệ admin để xác nhận.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Thử <strong>đổi mạng</strong>: từ Wi-Fi sang 4G hoặc ngược lại.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">5</span>
+                <span class="step-text"><strong>Khởi động lại iPhone</strong> rồi thử kết nối lại.</span>
+              </li>
+            </ol>
+            <div class="note-box note-tip">
+              <i class="ti ti-info-circle"></i>
+              Một số mạng công cộng (khách sạn, quán cà phê) chặn cổng VPN. Chuyển sang 4G thường khắc phục được ngay.
+            </div>
+          </div>
+        </div>
+
+        <!-- Lỗi 2 -->
+        <div id="content-err2" class="content-panel">
+          <div class="section-label">Cách xử lý</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Thử <strong>đổi server</strong> sang vị trí gần hơn nếu có nhiều server để chọn.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Ngắt và kết nối lại — đôi khi server phân bổ lại nhanh hơn.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Kiểm tra tốc độ mạng gốc <strong>không qua VPN</strong> — nếu mạng gốc đã chậm thì VPN không giúp được.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Liên hệ admin để biết server nào đang <strong>ít tải</strong> hơn.</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Lỗi 3 -->
+        <div id="content-err3" class="content-panel">
+          <div class="section-label">Cách xử lý</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Kiểm tra lại <strong>tên đăng nhập và mật khẩu</strong> — chú ý chữ hoa/thường, không có dấu cách thừa.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Xóa cấu hình VPN cũ và <strong>thêm lại từ đầu</strong>.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Nếu dùng certificate: kiểm tra <strong>ngày hết hạn</strong> trong Cài đặt → Cài đặt chung → VPN và quản lý thiết bị → Profile.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Yêu cầu admin <strong>cấp lại tài khoản</strong> hoặc certificate mới nếu đã hết hạn.</span>
+              </li>
+            </ol>
+            <div class="note-box note-fix">
+              <i class="ti ti-check"></i>
+              Hầu hết lỗi auth do mật khẩu sai hoặc certificate hết hạn — xóa cài lại thường giải quyết được.
+            </div>
+          </div>
+        </div>
+
+        <!-- Lỗi 4 -->
+        <div id="content-err4" class="content-panel">
+          <div class="section-label">Cách xử lý</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Vào cấu hình VPN → bật <strong>Kết nối theo yêu cầu</strong> (Connect On Demand) — iOS tự kết nối lại khi cần.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Kiểm tra <strong>Chế độ tiết kiệm pin</strong> — chế độ này có thể ngắt VPN chạy nền.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Tắt <strong>Wi-Fi Assist</strong> trong Cài đặt → Di động — chuyển mạng tự động đôi khi gây drop VPN.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Liên hệ admin — có thể timeout được đặt quá ngắn ở phía server.</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Lỗi 5 -->
+        <div id="content-err5" class="content-panel">
+          <div class="section-label">Cách xử lý</div>
+          <div class="detail-card">
+            <ol class="step-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <span class="step-text">Mở file <strong>.mobileconfig</strong> từ email hoặc Safari — không mở qua Zalo, Telegram hay Files.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <span class="step-text">Vào <strong>Cài đặt</strong> → <strong>Profile đã tải về</strong> → nhấn <strong>Cài đặt</strong> để xác nhận.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <span class="step-text">Nếu báo "Profile không hợp lệ": yêu cầu admin gửi lại file — file có thể bị hỏng khi truyền qua email.</span>
+              </li>
+              <li class="step-item">
+                <span class="step-num">4</span>
+                <span class="step-text">Nếu iOS báo "Không tin cậy": vào <strong>Cài đặt → Cài đặt chung → Thông tin → Tin cậy chứng chỉ</strong> và bật trust cho certificate đó.</span>
+              </li>
+            </ol>
+            <div class="note-box note-tip">
+              <i class="ti ti-info-circle"></i>
+              File .mobileconfig phải mở bằng <strong>Safari</strong> hoặc <strong>Mail</strong>. Mở qua Zalo, Telegram... thường không cài được.
+            </div>
+          </div>
+        </div>
+
+        <!-- Team -->
+        <div id="content-team" class="content-panel">
+          <div class="section-label">Người tin cậy</div>
+          <div class="detail-card">
+            <div class="person-row">
+              <div class="avatar av-b">TL</div>
+              <div class="person-info">
+                <div class="person-name">Trần Lâm</div>
+                <div class="person-role">Network Admin — cấu hình server VPN</div>
+              </div>
+              <span class="contact-tag">@tranlam</span>
+            </div>
+            <div class="person-row">
+              <div class="avatar av-g">KD</div>
+              <div class="person-info">
+                <div class="person-name">Khoa Đinh</div>
+                <div class="person-role">IT Support — cấp tài khoản, certificate</div>
+              </div>
+              <span class="contact-tag">@khoadin</span>
+            </div>
+            <div class="person-row">
+              <div class="avatar av-p">BT</div>
+              <div class="person-info">
+                <div class="person-name">Bảo Trần</div>
+                <div class="person-role">Security — lỗi auth, quyền truy cập</div>
+              </div>
+              <span class="contact-tag">@baotran</span>
+            </div>
+            <div class="person-row">
+              <div class="avatar av-y">NP</div>
+              <div class="person-info">
+                <div class="person-name">Ngọc Phạm</div>
+                <div class="person-role">IT Helpdesk — hỗ trợ thiết bị iOS</div>
+              </div>
+              <span class="contact-tag">@ngocpham</span>
+            </div>
+            <div class="note-box note-info" style="margin-top:12px">
+              <i class="ti ti-message-circle"></i>
+              Liên hệ qua Slack nội bộ. Ping <strong>@tranlam</strong> cho lỗi kết nối, <strong>@baotran</strong> cho lỗi xác thực.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- #detail-view -->
+
+  </div><!-- .phone-body -->
+
+  <!-- home indicator -->
+  <div class="home-indicator"><div class="home-bar"></div></div>
+
+</div><!-- .phone -->
+
+<script>
+  var titles = {
+    setup:   'Cài đặt VPN lần đầu',
+    connect: 'Kết nối và ngắt VPN',
+    check:   'Kiểm tra VPN',
+    err1:    'Không kết nối được',
+    err2:    'Mạng chậm qua VPN',
+    err3:    'Lỗi xác thực',
+    err4:    'VPN tự ngắt kết nối',
+    err5:    'Lỗi nhập profile',
+    team:    'Đội ngũ hỗ trợ'
+  };
+
+  function openSection(id) {
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block';
+    document.querySelectorAll('.content-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    var el = document.getElementById('content-' + id);
+    if (el) el.classList.add('active');
+    document.getElementById('back-btn').style.visibility = 'visible';
+    document.getElementById('topbar-title').textContent = titles[id] || 'Chi tiết';
+    document.querySelector('.phone-body').scrollTop = 0;
+  }
+
+  function goHome() {
+    document.getElementById('home-view').style.display = 'block';
+    document.getElementById('detail-view').style.display = 'none';
+    document.getElementById('back-btn').style.visibility = 'hidden';
+    document.getElementById('topbar-title').textContent = 'VPN iOS';
+    document.querySelector('.phone-body').scrollTop = 0;
+  }
+</script>
+</body>
+</html>
